@@ -13,22 +13,18 @@ app.use(express.json()) //  its a middleware. We get response as JSON object. To
 
 app.post("/signup", async(req, res) => {
 
-    console.log(req.body)
-    // const user = new User({
-    //     firstName: "Ashiya",
-    //     lastName: "Amanulla",
-    //     email: "ashiya1005@gmail.com",
-    //     password: "ashiya",
-    //     age: 32,
-    //     gender: "Female"
-    // })
     const user = new User(req.body)
+    console.log(req.body)
     try{
-        await user.save()
+        const savedUser = await user.save()
+        console.log(savedUser)
+        if(!savedUser){
+            res.status(404).send("Unable to save user")
+        }
         res.send("User saved successfully")
     }
     catch(error){
-        res.send(400).send("Error saving the user: ", error.message)
+        res.status(400).send("Error saving the user:" + error)
     }
 })
 
@@ -70,6 +66,49 @@ app.get("/user/:userId", async(req, res) => {
     }
     catch(error){
         res.status(400).send("Something went wrong")
+    }
+})
+
+//Delete API for user
+app.delete("/user", async(req, res) => {
+    try{
+        const deletedUser = await User.findByIdAndDelete(req.body)
+        if(!deletedUser){
+            res.status(404).send("User not found")
+        }
+        res.send(deletedUser)
+    }
+    catch(error){
+        res.status(400).send("Something went wrong")
+    }
+})
+
+//Update user
+app.patch("/user/:userId", async(req, res) => {
+    try{
+        console.log(req.params.userId, req.body)
+        const ALLOWED_UPDATES = ["firstName", "lastName", "password", "age", "gender", "bio", "photoUrl", "skills"]
+        const isUpdateAllowed = Object.keys(req.body).every((k) => 
+            ALLOWED_UPDATES.includes(k)
+        )
+        console.log(isUpdateAllowed)
+        if(!isUpdateAllowed){
+            throw new Error("Update not allowed")
+        }
+        if(req.body?.skills.length > 20) throw new Error("Skills cannot ne more than 20")
+        const updatedUser = await User.findByIdAndUpdate(
+            {_id: req.params.userId},
+            req.body, 
+            {returnDocument:"after",runValidators: true }
+        )
+        console.log(updatedUser)
+        if(!updatedUser){
+            res.status(404).send("User not found")
+        }
+        res.send(updatedUser)
+    }
+    catch(error){
+        res.status(400).send("USER UPDATE FAILED:" + error)
     }
 })
 
