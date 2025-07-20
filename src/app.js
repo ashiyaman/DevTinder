@@ -1,4 +1,5 @@
 const express = require("express"); //  reference to the express that is in node_modules folder
+const {userAuth} = require("./middlewares/auth")
 
 const app = express(); // create instance of express
 //  create a new express server
@@ -6,11 +7,17 @@ const app = express(); // create instance of express
 const { connectDB } = require("./config/database");
 const User = require("./models/users");
 const { validateSignUp } = require("./utils/validation");
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken")
 
 app.use(express.json()); //  its a middleware. We get response as JSON object. To read we need to parse through JSON.
 //  It is provided by express itself
 // similar to app.use("/") => when we dont give any endpoint, its applied to all routes
+
+app.use(cookieParser())
+
+const SECRET_JWT = process.env.SECRET_JWT
 
 //User register
 app.post("/signup", async (req, res) => {
@@ -45,15 +52,23 @@ app.post("/signup", async (req, res) => {
 //User Login
 
 app.post("/login", async(req, res) => {
+    console.log("login")
     try{
         const {email, password} = req.body
         const user = await User.findOne({email: email})
-
         if(!user){
             throw new Error("INVALID CREDENTIALS")
         }
+        //Check if pwd is correct
         const isPasswordMatched = await bcrypt.compare(password, user.password)
         if(isPasswordMatched){
+            //create JWT token
+            
+            const token = jwt.sign({_id: user._id}, SECRET_JWT, {expiresIn: "7d"})
+
+            //pass the token in a cookie
+            res.cookie("token", token)
+
             res.status(200).send("Welcome to DevTinder")
         }
         else{
@@ -63,6 +78,28 @@ app.post("/login", async(req, res) => {
     catch (error) {
         res.status(400).send("INVALID CREDENTIALS");
     }
+})
+
+//Get user profile
+app.get("/profile", userAuth, async(req, res) => {
+  try{
+    const user = req.user
+    res.status(200).json(user)
+  }
+  catch (error) {
+    res.status(400).json("Some error", error);
+  }
+})
+
+//Send connection request
+app.post("/sendConnectionRequest", userAuth, async(req, res) => {
+  try{
+    const user = req.user
+    res.send(user.firstName + " has sent a connection request.")
+  }
+  catch(error){
+    res.status(400).json("ËRROR: " + error.message)
+  }
 })
 
 app.get("/user", async (req, res) => {
@@ -157,8 +194,8 @@ app.patch("/user/:userId", async (req, res) => {
 connectDB()
   .then(() => {
     console.log("Connected to database successfully");
-    app.listen(3000, () => {
-      console.log("Server is successfully listening on port 3000");
+    app.listen(4000, () => {
+      console.log("Server is successfully listening on port 4000");
     });
   })
   .catch((err) => {
