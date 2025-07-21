@@ -1,5 +1,10 @@
 const express = require("express")
+const jwt = require("jsonwebtoken")
+const bcrypt = require("bcrypt")
+require("dotenv").config()
 const { default: mongoose } = require("mongoose")
+
+const SECRET_JWT = process.env.SECRET_JWT
 
 const userSchema = new mongoose.Schema({
     firstName: {
@@ -54,5 +59,20 @@ const userSchema = new mongoose.Schema({
     }
 },
 {timestamps: true})
+
+userSchema.methods.getJWT = function(){
+    const user = this
+    const token = jwt.sign({_id: user._id}, SECRET_JWT, {expiresIn: "7d"})
+
+    return token
+}
+
+userSchema.methods.validatePassword = async function(passwordInputByUser){
+    const user = this
+    const passwordHash = user.password
+    const isPasswordValid = await bcrypt.compare(passwordInputByUser, passwordHash)
+
+    return isPasswordValid
+}
 
 module.exports = mongoose.model("User", userSchema)

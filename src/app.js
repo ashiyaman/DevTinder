@@ -60,11 +60,12 @@ app.post("/login", async(req, res) => {
             throw new Error("INVALID CREDENTIALS")
         }
         //Check if pwd is correct
-        const isPasswordMatched = await bcrypt.compare(password, user.password)
+        const isPasswordMatched = user.validatePassword(password)
         if(isPasswordMatched){
             //create JWT token
             
-            const token = jwt.sign({_id: user._id}, SECRET_JWT, {expiresIn: "7d"})
+            const token = user.getJWT()
+            console.log(token)
 
             //pass the token in a cookie
             res.cookie("token", token)
@@ -76,7 +77,7 @@ app.post("/login", async(req, res) => {
         }
     }
     catch (error) {
-        res.status(400).send("INVALID CREDENTIALS");
+        res.status(400).send("ERROR: " + error.message);
     }
 })
 
