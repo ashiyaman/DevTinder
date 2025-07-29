@@ -6,22 +6,16 @@ const SECRET_JWT = process.env.SECRET_JWT
 
 const userAuth = async(req, res, next) => {
     try{
-        //get token
-        console.log("cookies....", req.cookies)
+        //get token        
         const {token} = req.cookies
-        console.log(token)
         if(!token){
-            console.log("Token not ")
             throw new Error("Token not valid.")
         }
         //validate token
-        console.log("....secret..............", SECRET_JWT)
         const decodedObj = jwt.verify(token, SECRET_JWT)
         const {_id} = decodedObj
-        console.log(_id)
         //Get user from DB
         const loggedInUser = await User.findById(_id)
-        console.log("User.....", loggedInUser)
         if(!loggedInUser){
             throw new Error("User not found")
         }
