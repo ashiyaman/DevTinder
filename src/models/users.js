@@ -1,4 +1,3 @@
-const express = require("express")
 const jwt = require("jsonwebtoken")
 const bcrypt = require("bcrypt")
 require("dotenv").config()
@@ -39,6 +38,9 @@ const userSchema = new mongoose.Schema({
     },
     gender: {
         type: String,
+        enum: {
+            values: ["male", "female", "others"]
+        },
         validate(value){
             if(!["male", "female", "others"].includes(value)){
                 throw new Error("Gender data is not valid")
