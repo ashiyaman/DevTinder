@@ -1,6 +1,7 @@
 const express = require("express")
 const {userAuth} = require("../middlewares/auth")
 const ConnectionRequest = require("../models/connectionRequests");
+const User = require("../models/users")
 
 const requestRouter = express.Router()
 
@@ -21,18 +22,26 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async(req, res) 
   try{
     console.log("send req")
     const fromUserId = req.user._id
-    const toUserId = req.params.toUserId
+    const toUser = await User.findById(req.params.toUserId)
     const status = req.params.status
+
+    if(fromUserId === toUser._id){
+      res.status(400).json({message: "Cannot send invite to yourself"})
+    }
 
     const ALLOWED_STATUS = ["ignored", "interested"]
     if(!ALLOWED_STATUS.includes(status)){
       res.status(400).json({message: "Invalid status type: " + status})
     }
 
+    if(!toUser){
+      res.status(400).json({message: "User not found"})
+    }
+
     const existingConnectionRequest = await ConnectionRequest.findOne({
       $or: [
-        {fromUserId, toUserId},
-        {fromUserId: toUserId, toUserId: fromUserId}
+        {fromUserId, toUserId: toUser._id},
+        {fromUserId: toUser._id, toUserId: fromUserId}
       ]
     })
 
@@ -40,10 +49,10 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async(req, res) 
       res.status(400).json({message: "Invite has already been sent"})
     }
 
-    const connection = new ConnectionRequest({fromUserId: fromUserId, toUserId: toUserId, status: status})
+    const connection = new ConnectionRequest({fromUserId: fromUserId, toUserId: toUser._id, status: status})
     await connection.save()
 
-    res.status(200).json({message: `Connect Request Sent`})
+    res.status(200).json({message: `Connect Request Sent to ${toUser.firstName}`})
   }
  catch(error){
   res.status(400).send("ERROR: " + error.message)

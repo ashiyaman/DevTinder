@@ -70,7 +70,7 @@ authRouter.post("/login", async(req, res) => {
 })
 
 //Logout
-authRouter.get("/logout", async(req, res) => {
+authRouter.post("/logout", async(req, res) => {
   res.cookie("token", null, {expiresIn: new Date(Date.now())})
   res.send("You have logged out successfully")
 })
