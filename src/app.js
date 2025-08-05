@@ -13,6 +13,7 @@ const cookieParser = require("cookie-parser");
 const {authRouter} = require("./routes/auth");
 const { profileRouter } = require("./routes/profile");
 const { requestRouter } = require("./routes/request");
+const { userRouter } = require("./routes/user")
 
 app.use(express.json()); //  its a middleware. We get response as JSON object. To read we need to parse through JSON.
 //  It is provided by express itself
@@ -25,6 +26,7 @@ const SECRET_JWT = process.env.SECRET_JWT
 app.use("/", authRouter)
 app.use("/", profileRouter)
 app.use("/", requestRouter)
+app.use("/", userRouter)
 
 //  Get all users
 app.get("/feed", async (req, res) => {

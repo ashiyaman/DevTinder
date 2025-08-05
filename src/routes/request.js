@@ -31,7 +31,7 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async(req, res) 
 
     const ALLOWED_STATUS = ["ignored", "interested"]
     if(!ALLOWED_STATUS.includes(status)){
-      return res.status(400).json({message: "Invalid status type: " + status})
+      return res.status(400).json({message: "Status not allowed: " + status})
     }
 
     if(!toUser){
@@ -67,7 +67,7 @@ requestRouter.post("/request/review/:status/:requestId", userAuth, async(req, re
 
     const ALLOWED_STATUS = ["accepted", "rejected"]
     if(!ALLOWED_STATUS.includes(status)){
-      return res.status(400).json({message: "invalid status type: " + status})
+      return res.status(400).json({message: "Status not allowed: " + status})
     }
 
     const connection = await ConnectionRequest.findOne({

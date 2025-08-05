@@ -10,6 +10,7 @@ const authRouter = express.Router()
 //User register
 authRouter.post("/signup", async (req, res) => {
   try {
+    console.log(req.body)
     const {firstName, lastName, email, password} = req.body
 
     //Validate user
