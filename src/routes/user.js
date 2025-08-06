@@ -98,7 +98,6 @@ userRouter.get("/feed", userAuth, async(req, res) => {
             ]
         })
 
-        console.log(feedConnections)
         res.status(200).send(feedConnections)
     }
     catch(error){
