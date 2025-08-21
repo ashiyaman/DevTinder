@@ -20,7 +20,6 @@ requestRouter.post("/sendConnectionRequest", userAuth, async(req, res) => {
 //interested or ignore request
 requestRouter.post("/request/send/:status/:toUserId", userAuth, async(req, res) => {
   try{
-    console.log("send req")
     const fromUserId = req.user._id
     const toUser = await User.findById(req.params.toUserId)
     const status = req.params.status

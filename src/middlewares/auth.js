@@ -9,7 +9,7 @@ const userAuth = async(req, res, next) => {
         //get token        
         const {token} = req.cookies
         if(!token){
-            throw new Error("Token not valid.")
+            return res.status(401).send({message: "Please Login!!"})
         }
         //validate token
         const decodedObj = jwt.verify(token, SECRET_JWT)

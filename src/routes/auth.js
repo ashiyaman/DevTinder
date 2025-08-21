@@ -10,7 +10,6 @@ const authRouter = express.Router()
 //User register
 authRouter.post("/signup", async (req, res) => {
   try {
-    console.log(req.body)
     const {firstName, lastName, email, password} = req.body
 
     //Validate user
@@ -28,7 +27,7 @@ authRouter.post("/signup", async (req, res) => {
     });
     
     const savedUser = await user.save();
-    console.log(savedUser);
+
     if (!savedUser) {
       res.status(404).send("Unable to save user");
     }
@@ -41,7 +40,6 @@ authRouter.post("/signup", async (req, res) => {
 //User Login
 
 authRouter.post("/login", async(req, res) => {
-    console.log("login")
     try{
         const {email, password} = req.body
         const user = await User.findOne({email: email})
@@ -49,17 +47,16 @@ authRouter.post("/login", async(req, res) => {
             throw new Error("INVALID CREDENTIALS")
         }
         //Check if pwd is correct
-        const isPasswordMatched = user.validatePassword(password)
+        const isPasswordMatched = await user.validatePassword(password)
         if(isPasswordMatched){
             //create JWT token
             
             const token = user.getJWT()
-            console.log(token)
 
             //pass the token in a cookie
             res.cookie("token", token)
 
-            res.status(200).send("Welcome to DevTinder")
+            res.status(200).send(user)
         }
         else{
             throw new Error("INVALID CREDENTIALS")

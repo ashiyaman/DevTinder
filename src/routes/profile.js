@@ -5,9 +5,8 @@ const User = require("../models/users");
 const { validateEditProfileData } = require("../utils/validation");
 
 const profileRouter = express.Router()
-console.log(userAuth)
 
-profileRouter.get("/profile", userAuth , async(req, res) => {
+profileRouter.get("/profile/view", userAuth , async(req, res) => {
   try {
     const user = req.user
     if (!user) {

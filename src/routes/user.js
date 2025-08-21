@@ -9,7 +9,6 @@ const USER_POPULATE_DATA = "firstName age gender bio photoUrl skills"
 
 userRouter.get("/user/request/received", userAuth, async(req, res) => {
     try{
-        console.log(req.user)
         const loggedInUser = req.user
         if(!loggedInUser){
             return res.status(400).json({message: "User not found"})
@@ -23,7 +22,6 @@ userRouter.get("/user/request/received", userAuth, async(req, res) => {
             "fromUserId",
             USER_POPULATE_DATA
         )
-        console.log(userConnections)
         if(!userConnections){
             return res.status(200).json({message: "No connection request"})
         }
@@ -41,7 +39,6 @@ userRouter.get("/user/request/received", userAuth, async(req, res) => {
 userRouter.get("/user/connections", userAuth, async(req, res) => {
     try{
         const loggedInUser = req.user
-        console.log(loggedInUser.firstName)
         const connectionRequests = await ConnectionRequest.find({
             $or: [
                 {toUserId: loggedInUser._id, status: "accepted"},
@@ -49,8 +46,6 @@ userRouter.get("/user/connections", userAuth, async(req, res) => {
             ]
         })
         .populate("fromUserId", USER_POPULATE_DATA)
-
-        console.log(connectionRequests)
 
         if(!connectionRequests){
             return res.status(200).json({message: "No connections yet!"})

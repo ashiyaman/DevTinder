@@ -1,5 +1,5 @@
 const express = require("express"); //  reference to the express that is in node_modules folder
-const {userAuth} = require("./middlewares/auth")
+const cors = require("cors")
 
 const app = express(); // create instance of express
 //  create a new express server
@@ -15,6 +15,10 @@ const { profileRouter } = require("./routes/profile");
 const { requestRouter } = require("./routes/request");
 const { userRouter } = require("./routes/user")
 
+app.use(cors({
+  origin: "http://localhost:5173",
+  credentials: true
+}))
 app.use(express.json()); //  its a middleware. We get response as JSON object. To read we need to parse through JSON.
 //  It is provided by express itself
 // similar to app.use("/") => when we dont give any endpoint, its applied to all routes
@@ -70,7 +74,6 @@ app.delete("/user", async (req, res) => {
 //Update user
 app.patch("/user/:userId", async (req, res) => {
   try {
-    console.log(req.params.userId, req.body);
     const ALLOWED_UPDATES = [
       "firstName",
       "lastName",
@@ -84,7 +87,6 @@ app.patch("/user/:userId", async (req, res) => {
     const isUpdateAllowed = Object.keys(req.body).every((k) =>
       ALLOWED_UPDATES.includes(k)
     );
-    console.log(isUpdateAllowed);
     if (!isUpdateAllowed) {
       throw new Error("Update not allowed");
     }
@@ -95,7 +97,6 @@ app.patch("/user/:userId", async (req, res) => {
       req.body,
       { returnDocument: "after", runValidators: true }
     );
-    console.log(updatedUser);
     if (!updatedUser) {
       res.status(404).send("User not found");
     }
@@ -107,9 +108,8 @@ app.patch("/user/:userId", async (req, res) => {
 
 connectDB()
   .then(() => {
-    console.log("Connected to database successfully");
-    app.listen(4000, () => {
-      console.log("Server is successfully listening on port 4000");
+    app.listen(5000, () => {
+      console.log("Server is successfully listening on port 5000");
     });
   })
   .catch((err) => {
